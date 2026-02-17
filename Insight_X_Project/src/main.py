@@ -8,6 +8,8 @@ from data_loader import load_data
 from preprocessing import prepare_training_data, prepare_test_data
 from model import train_model, evaluate_model
 from sklearn.metrics import classification_report
+from eda import basic_dataset_overview, plot_label_distribution
+from data_quality import check_zero_variance, check_low_variance, correlation_analysis, detect_high_correlation
 
 # File paths for training and test datasets
 TRAIN_PATH = "../data/KDDTrain+.txt"
@@ -31,6 +33,18 @@ def main():
     # Preprocess training data: filter, encode categorical features, scale
     print("Preparing training data...")
     X_train, scaler, train_columns = prepare_training_data(train_df)
+
+    basic_dataset_overview(train_df, "Training Data")
+    plot_label_distribution(train_df)
+    
+    # Perform data quality checks on full training dataset (excluding label and difficulty)
+    features_only = train_df.drop(columns=['label','difficulty'])
+
+    zero_var = check_zero_variance(features_only)
+    low_var = check_low_variance(features_only)
+
+    corr_matrix = correlation_analysis(features_only)
+    high_corr = detect_high_correlation(corr_matrix)
     
     # Train Isolation Forest model on normal traffic
     print("Training model...")

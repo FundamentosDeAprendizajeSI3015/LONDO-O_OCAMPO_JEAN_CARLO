@@ -9,6 +9,16 @@ from sklearn.preprocessing import StandardScaler
 # Categorical features requiring one-hot encoding
 CATEGORICAL_COLS = ['protocol_type', 'service', 'flag']
 
+# Features to remove based on data quality audit
+FEATURES_TO_DROP = [
+    'num_outbound_cmds',
+    'num_root',
+    'srv_serror_rate',
+    'dst_host_srv_serror_rate',
+    'srv_rerror_rate',
+    'dst_host_srv_rerror_rate'
+]
+
 def prepare_training_data(train_df):
     """
     Prepare training data by filtering, encoding, and scaling.
@@ -24,6 +34,9 @@ def prepare_training_data(train_df):
     
     # Remove non-feature columns (labels and difficulty)
     X = normal_df.drop(columns=['label', 'difficulty'])
+    
+    # Remove redundant or zero-variance features
+    X = X.drop(columns=FEATURES_TO_DROP)
     
     # Convert categorical variables to binary columns via one-hot encoding
     X = pd.get_dummies(X, columns=CATEGORICAL_COLS)
@@ -48,6 +61,9 @@ def prepare_test_data(test_df, scaler, train_columns):
     """
     # Remove non-feature columns
     X = test_df.drop(columns=['label', 'difficulty'])
+    
+    # Remove redundant or zero-variance features
+    X = X.drop(columns=FEATURES_TO_DROP)
     
     # Apply one-hot encoding with same categorical features
     X = pd.get_dummies(X, columns=CATEGORICAL_COLS)
