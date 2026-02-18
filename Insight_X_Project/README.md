@@ -232,6 +232,21 @@ data/
 
 ---
 
+## Generated Visualizations
+
+All figures generated during the pipeline execution are automatically stored in:
+
+reports/figures/
+
+These include:
+
+- Label distribution
+- Feature distributions
+- Correlation matrix
+- Anomaly score distribution
+- Score comparison by class
+- PCA projection
+
 ## Final Reflection
 
 A model that is not continuously updated will eventually classify the future as anomalous.
