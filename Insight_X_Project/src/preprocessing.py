@@ -9,42 +9,21 @@ from sklearn.preprocessing import StandardScaler
 # Categorical features requiring one-hot encoding
 CATEGORICAL_COLS = ['protocol_type', 'service', 'flag']
 
-# Features to remove based on data quality audit
-FEATURES_TO_DROP = [
-    'num_outbound_cmds',
-    'num_root',
-    'srv_serror_rate',
-    'dst_host_srv_serror_rate',
-    'srv_rerror_rate',
-    'dst_host_srv_rerror_rate'
-]
-
 def prepare_training_data(train_df):
     """
-    Prepare training data by filtering, encoding, and scaling.
-    
-    Args:
-        train_df (pd.DataFrame): Raw training dataset
-        
-    Returns:
-        tuple: (X_scaled array, fitted scaler, feature column names)
+    Prepare training data for anomaly detection.
+    Only normal traffic is used for fitting the model.
     """
-    # Filter for normal traffic only (baseline for anomaly detection)
+    # Use only normal traffic to model baseline behavior
     normal_df = train_df[train_df['label'] == 'normal']
-    
-    # Remove non-feature columns (labels and difficulty)
+
     X = normal_df.drop(columns=['label', 'difficulty'])
-    
-    # Remove redundant or zero-variance features
-    X = X.drop(columns=FEATURES_TO_DROP)
-    
-    # Convert categorical variables to binary columns via one-hot encoding
+
     X = pd.get_dummies(X, columns=CATEGORICAL_COLS)
-    
-    # Initialize and fit scaler on training data
+
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
-    
+
     return X_scaled, scaler, X.columns
 
 def prepare_test_data(test_df, scaler, train_columns):
@@ -61,9 +40,6 @@ def prepare_test_data(test_df, scaler, train_columns):
     """
     # Remove non-feature columns
     X = test_df.drop(columns=['label', 'difficulty'])
-    
-    # Remove redundant or zero-variance features
-    X = X.drop(columns=FEATURES_TO_DROP)
     
     # Apply one-hot encoding with same categorical features
     X = pd.get_dummies(X, columns=CATEGORICAL_COLS)
