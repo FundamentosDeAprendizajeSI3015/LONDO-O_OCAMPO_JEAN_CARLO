@@ -88,28 +88,29 @@ y = df["target"]
 print("Feature matrix shape:", X.shape)
 
 # ==============================
-# 5. TRAIN / VALIDATION / TEST SPLIT
+# 5. EXTREME REDUCTION EXPERIMENT (5% TRAIN)
 # ==============================
 
-# First split: train (60%) and temp (40%)
-X_train, X_temp, y_train, y_temp = train_test_split(
+# First: create small training subset (5% of full dataset)
+X_train, X_remaining, y_train, y_remaining = train_test_split(
     X, y,
-    test_size=0.4,
+    test_size=0.95,
     random_state=42,
     stratify=y
 )
 
-# Second split: validation (20%) and test (20%)
+print("Training size (5% approx):", X_train.shape)
+
+# Now split remaining data into validation and test (each 50% of remaining)
 X_val, X_test, y_val, y_test = train_test_split(
-    X_temp, y_temp,
+    X_remaining, y_remaining,
     test_size=0.5,
     random_state=42,
-    stratify=y_temp
+    stratify=y_remaining
 )
 
-print("Train shape:", X_train.shape)
-print("Validation shape:", X_val.shape)
-print("Test shape:", X_test.shape)
+print("Validation size:", X_val.shape)
+print("Test size:", X_test.shape)
 
 # ==============================
 # 6. SCALING
@@ -177,3 +178,34 @@ evaluate_model("Random Forest", "Test", y_test, rf_test_pred)
 # Gradient Boosting
 evaluate_model("Gradient Boosting", "Validation", y_val, gb_val_pred)
 evaluate_model("Gradient Boosting", "Test", y_test, gb_test_pred)
+
+importances = rf_model.feature_importances_
+feature_names = X.columns
+
+feat_imp_df = pd.DataFrame({
+    "feature": feature_names,
+    "importance": importances
+}).sort_values(by="importance", ascending=False)
+
+# show top 15
+top_n = 15
+plt.figure(figsize=(10,6))
+sns.barplot(
+    x="importance",
+    y="feature",
+    data=feat_imp_df.head(top_n)
+)
+plt.title("Top 15 Feature Importances - Random Forest")
+plt.show()
+
+from sklearn.tree import plot_tree
+
+plt.figure(figsize=(20,10))
+plot_tree(
+    rf_model.estimators_[0],   # Plot the first tree in the forest
+    feature_names=X.columns,
+    class_names=["Normal", "Attack"],
+    filled=True,
+    max_depth=3  # Limit depth for better visualization
+)
+plt.show()
