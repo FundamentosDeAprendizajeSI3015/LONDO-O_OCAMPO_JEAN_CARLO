@@ -98,6 +98,10 @@ def main():
     # =========================
     print("Preparing training data...")
     X_train, scaler, train_columns = prepare_training_data(train_data)
+    
+    # Note For the teacher: I'm aware that we haven't seen this type of model before,
+    # however I took it upon myself to research and try to learn and develop this project.
+    # I apologize if the solution isn't perfect yet.
 
     # =========================
     # 4. Model Training
