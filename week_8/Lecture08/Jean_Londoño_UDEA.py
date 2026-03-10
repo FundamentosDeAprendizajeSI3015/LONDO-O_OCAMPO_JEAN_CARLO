@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 from sklearn.model_selection import (
     train_test_split,
@@ -41,6 +42,13 @@ warnings.filterwarnings("ignore")
 
 plt.rcParams["figure.figsize"] = (10,6)
 sns.set_style("whitegrid")
+
+# ==========================================================
+# CARPETA PARA GUARDAR GRÁFICAS
+# ==========================================================
+
+OUTPUT_DIR = "graficas"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # ==========================================================
 # LOAD DATA
@@ -78,7 +86,9 @@ def basic_eda(df):
 
     sns.countplot(x="label", data=df)
     plt.title("Distribución Variable Objetivo")
-    plt.show()
+
+    plt.savefig(f"{OUTPUT_DIR}/distribucion_label.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
 
 # ==========================================================
@@ -111,7 +121,9 @@ def plot_histograms(df, features):
         ax.set_title(col)
 
     plt.tight_layout()
-    plt.show()
+
+    plt.savefig(f"{OUTPUT_DIR}/histogramas_variables.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
 
 # ==========================================================
@@ -137,7 +149,9 @@ def correlation_matrix(df, features):
     )
 
     plt.title("Matriz de Correlación")
-    plt.show()
+
+    plt.savefig(f"{OUTPUT_DIR}/matriz_correlacion.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
     print("\nCorrelación con label:")
     print(corr["label"].sort_values(ascending=False))
@@ -305,7 +319,9 @@ def evaluate_model(model, X_train, X_test, y_train, y_test, name):
 
     sns.heatmap(cm, annot=True, fmt="d")
     plt.title(f"Confusion Matrix - {name}")
-    plt.show()
+
+    plt.savefig(f"{OUTPUT_DIR}/confusion_matrix_{name}.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
     return y_test_proba
 
@@ -335,7 +351,8 @@ def plot_roc(models, X_test, y_test):
     plt.xlabel("FPR")
     plt.ylabel("TPR")
 
-    plt.show()
+    plt.savefig(f"{OUTPUT_DIR}/curvas_roc_modelos.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
 
 # ==========================================================
@@ -356,7 +373,8 @@ def feature_importance(model,features,title):
 
     plt.title(title)
 
-    plt.show()
+    plt.savefig(f"{OUTPUT_DIR}/feature_importance_random_forest.png", dpi=300, bbox_inches="tight")
+    plt.close()
 
 
 # ==========================================================
@@ -401,15 +419,15 @@ def main():
     gb.fit(X_train,y_train)
 
     evaluate_model(
-        dt,X_train,X_test,y_train,y_test,"Decision Tree"
+        dt,X_train,X_test,y_train,y_test,"Decision_Tree"
     )
 
     evaluate_model(
-        rf,X_train,X_test,y_train,y_test,"Random Forest"
+        rf,X_train,X_test,y_train,y_test,"Random_Forest"
     )
 
     evaluate_model(
-        gb,X_train,X_test,y_train,y_test,"Gradient Boosting"
+        gb,X_train,X_test,y_train,y_test,"Gradient_Boosting"
     )
 
     plot_roc(
