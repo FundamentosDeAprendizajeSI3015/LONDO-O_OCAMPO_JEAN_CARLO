@@ -1,9 +1,30 @@
 # Network Anomaly Detection using Isolation Forest  
-NSL-KDD Dataset – Machine Learning Lifecycle Project  - Insight X
+NSL-KDD Dataset – Machine Learning Lifecycle Project (Insight X)
 
-Author: Jean Carlo Londoño Ocampo  
-Course: Fundamentos de Aprendizaje Automático  
-Year: 2026  
+**Author:** Jean Carlo Londoño Ocampo  
+**Course:** Fundamentos de Aprendizaje Automático  
+**Year:** 2026  
+
+---
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Problem Definition](#problem-definition)
+- [Dataset](#dataset)
+- [Data Exploration (EDA)](#data-exploration-eda)
+- [Data Quality Audit](#data-quality-audit)
+- [Feature Reduction](#feature-reduction)
+- [Preprocessing](#preprocessing)
+- [Model Selection](#model-selection)
+- [Evaluation](#evaluation)
+- [Extended Analysis](#extended-analysis)
+- [Project Structure](#project-structure)
+- [ML Lifecycle Covered](#ml-lifecycle-covered)
+- [Future Improvements](#future-improvements)
+- [Key Takeaways](#key-takeaways)
+- [Generated Visualizations](#generated-visualizations)
+- [Final Reflection](#final-reflection)
 
 ---
 
@@ -12,126 +33,134 @@ Year: 2026
 This project implements a complete Machine Learning lifecycle to detect anomalous network behavior that may indicate potential data exfiltration attempts.
 
 The system models normal network traffic behavior and detects deviations using unsupervised learning techniques.
+
+An extended analysis includes:
+- Unsupervised clustering evaluation  
+- Label re-evaluation through consensus voting  
+- Supervised model training  
+- Comparative analysis between original and corrected labels  
+
 ---
 
 ## Problem Definition
 
 The goal is to detect anomalous patterns in corporate network traffic that may indicate:
 
-- Data exfiltration
-- Suspicious internal activity
-- Malicious behavior disguised as normal traffic
+- Data exfiltration  
+- Suspicious internal activity  
+- Malicious behavior disguised as normal traffic  
 
-### Key Characteristics:
+### Key Characteristics
 
-- Primarily unsupervised problem
-- No fully reliable attack labels in real-world scenarios
-- Attacks evolve over time
-- Normal behavior changes dynamically
+- Primarily unsupervised problem  
+- No fully reliable labels in real-world scenarios  
+- Attacks evolve over time  
+- Normal behavior changes dynamically  
 
-Success is defined as:
+### Success Criteria
 
-- Low false positive rate
-- Meaningful anomaly detection
-- Stability over time
-- Operational usefulness for security analysts
+- Low false positive rate  
+- Meaningful anomaly detection  
+- Temporal stability  
+- Practical usefulness for analysts  
 
 ---
 
 ## Dataset
 
-Dataset used: **NSL-KDD**
+**Dataset used:** NSL-KDD  
 
-Why NSL-KDD?
+### Why NSL-KDD?
 
-- Academic benchmark
-- Contains 41 network features
-- Mix of numerical and categorical variables
-- Simulates normal and attack traffic
+- Academic benchmark  
+- 41 network features  
+- Mixed numerical and categorical variables  
+- Simulates normal and attack traffic  
 
-Limitations:
+### Limitations
 
-- Synthetic dataset
-- Does not represent modern insider threats
-- Static distribution (no concept drift)
+- Synthetic dataset  
+- No modern insider threat representation  
+- Static distribution (no concept drift)  
+
 ---
 
 ## Data Exploration (EDA)
 
-Performed:
+### Performed
 
-- Dataset shape analysis
-- Label distribution analysis
-- Feature type inspection
-- Correlation matrix visualization
-- Variance analysis
+- Dataset shape analysis  
+- Label distribution analysis  
+- Feature type inspection  
+- Correlation matrix visualization  
+- Variance analysis  
 
-Findings:
+### Findings
 
-- No missing values
-- Strong class imbalance
-- Presence of highly correlated feature groups
-- Some zero and near-zero variance features
+- No missing values  
+- Strong class imbalance  
+- Highly correlated feature groups  
+- Near-zero variance features  
 
 ---
 
 ## Data Quality Audit
 
-### Zero Variance Feature Removed:
+### Removed Feature
 
-- `num_outbound_cmds`
+- `num_outbound_cmds` (zero variance)
 
-### Low Variance Features Identified:
+### Low Variance Features Identified
 
-- land
-- urgent
-- num_failed_logins
-- root_shell
-- su_attempted
-- num_shells
-- num_access_files
-- is_host_login
-- is_guest_login
+- land  
+- urgent  
+- num_failed_logins  
+- root_shell  
+- su_attempted  
+- num_shells  
+- num_access_files  
+- is_host_login  
+- is_guest_login  
 
-(Note: Not all low variance features were removed due to potential security relevance.)
-
----
-
-## Correlation-Based Feature Reduction
-
-Highly correlated feature groups were identified.
-
-Manual + statistical hybrid selection approach was used.
-
-Removed features:
-
-- num_outbound_cmds
-- num_root
-- srv_serror_rate
-- dst_host_srv_serror_rate
-- srv_rerror_rate
-- dst_host_srv_rerror_rate
-
-Rationale:
-
-- Reduce redundancy
-- Improve model stability
-- Preserve representative signals
+Note: Not all were removed due to potential security relevance.
 
 ---
 
-## Preprocessing Steps
+## Feature Reduction
 
-1. Filter training data to include only normal traffic
-2. Remove selected redundant features
+Highly correlated feature groups were reduced using a hybrid manual-statistical approach.
+
+### Removed Features
+
+- num_outbound_cmds  
+- num_root  
+- srv_serror_rate  
+- dst_host_srv_serror_rate  
+- srv_rerror_rate  
+- dst_host_srv_rerror_rate  
+
+### Rationale
+
+- Reduce redundancy  
+- Improve model stability  
+- Preserve representative signals  
+
+---
+
+## Preprocessing
+
+Pipeline steps:
+
+1. Filter training data (normal traffic only)  
+2. Remove redundant features  
 3. One-hot encode categorical variables:
-   - protocol_type
-   - service
-   - flag
-4. Standardize numerical features using StandardScaler
-5. Align test set features with training set columns
+   - protocol_type  
+   - service  
+   - flag  
+4. Standardize numerical features (StandardScaler)  
+5. Align test set features  
 
-Important concept:
+Key idea:
 
 > Effective dimensionality depends on representation.
 
@@ -139,113 +168,194 @@ Important concept:
 
 ## Model Selection
 
-Model: Isolation Forest
+**Model:** Isolation Forest  
 
-Reasons:
+### Reasons
 
-- Unsupervised anomaly detection
-- Scales to high dimensional data
-- Robust to irrelevant features
-- Widely used in industry
+- Unsupervised anomaly detection  
+- Works in high-dimensional spaces  
+- Robust to irrelevant features  
+- Industry relevance  
 
-Training Strategy:
+### Training Strategy
 
-- Train only on normal traffic
-- Detect deviations in test data
+- Train only on normal traffic  
+- Detect anomalies in unseen data  
 
 ---
 
-##  Evaluation
+## Evaluation
 
-Even though the approach is unsupervised, labels were used for academic evaluation.
+Even though the approach is unsupervised, labels were used for evaluation.
 
-Metrics used:
+### Metrics
 
-- Precision
-- Recall
-- F1-score
-- Accuracy
+- Precision  
+- Recall  
+- F1-score  
+- Accuracy  
 
-Observations:
+### Observations
 
-- High precision in attack detection
-- Moderate recall
-- Conservative anomaly threshold
+- High precision  
+- Moderate recall  
+- Conservative anomaly threshold  
 
-Note:
+Important note:
 
-Accuracy is not the primary metric in anomaly detection.
+Accuracy is not the main metric in anomaly detection.
+
+---
+
+## Extended Analysis
+
+### Clustering Evaluation
+
+Algorithms used:
+
+- K-Means  
+- Fuzzy C-Means  
+- Subtractive Clustering  
+- DBSCAN  
+- Agglomerative (Ward)  
+
+### Results
+
+| Algorithm      | ARI    | NMI    | Silhouette |
+|----------------|--------|--------|------------|
+| K-Means        | 0.002  | 0.003  | 0.081      |
+| Fuzzy C-Means  | 0.568  | 0.476  | 0.198      |
+| Subtractive    | 0.562  | 0.546  | 0.214      |
+| DBSCAN         | 0.042  | 0.150  | -0.072     |
+| Agglomerative  | 0.411  | 0.344  | 0.194      |
+
+Best performance: Fuzzy C-Means and Subtractive (ARI ≈ 0.56)
+
+---
+
+### Label Re-evaluation
+
+- Consensus voting approach  
+- Hungarian algorithm for alignment  
+- 12,955 labels corrected (12.95%)  
+
+Results:
+
+- 868 normal → attack  
+- 12,087 attack → normal  
+
+---
+
+### Supervised Models
+
+| Model               | F1 (Original) | F1 (Relabeled) |
+|---------------------|---------------|----------------|
+| Decision Tree       | 99.1%         | 85.5%          |
+| Logistic Regression | 95.8%         | 85.4%          |
+| Linear Regression   | 94.8%         | 85.4%          |
+
+---
+
+### Comparative Analysis
+
+- Original labels outperform corrected labels  
+- Relabeling was too aggressive  
+- Recall dropped significantly  
+
+Conclusion:
+
+Automated relabeling without expert validation can degrade performance.
 
 ---
 
 ## Project Structure
-
 src/
-│
 ├── data_loader.py
 ├── preprocessing.py
 ├── model.py
 ├── eda.py
 ├── data_quality.py
-└── main.py
+├── visualization.py
+├── clustering.py
+├── relabeling.py
+├── supervised.py
+├── comparison.py
+├── main.py
+└── main_extended.py
 
 data/
-│
 ├── KDDTrain+.txt
 └── KDDTest+.txt
+
+reports/figures/
 
 
 ---
 
-## 🔄 ML Lifecycle Covered
+## ML Lifecycle Covered
 
-✔ Problem definition  
-✔ Data acquisition  
-✔ Data exploration  
-✔ Data quality audit  
-✔ Feature engineering  
-✔ Model training  
-✔ Evaluation  
+- Problem definition  
+- Data acquisition  
+- Data exploration  
+- Data quality audit  
+- Feature engineering  
+- Unsupervised model training  
+- Clustering evaluation  
+- Label re-evaluation  
+- Supervised training  
+- Model comparison  
+- Evaluation  
 
 ---
 
 ## Future Improvements
 
-- Threshold calibration
-- Dynamic contamination tuning
-- PCA dimensionality reduction
-- Hyperparameter optimization
-- Concept drift simulation
-- Deployment pipeline simulation
-- Model persistence (joblib)
-- Real-time streaming simulation
+- Threshold calibration  
+- Dynamic contamination tuning  
+- PCA before clustering  
+- Hyperparameter optimization  
+- Concept drift simulation  
+- Deployment pipeline  
+- Model persistence  
+- Real-time streaming  
+- Confident Learning  
+- Expert-in-the-loop validation  
 
 ---
 
-## Important Conceptual Takeaways
+## Key Takeaways
 
-- Anomaly detection is threshold-sensitive
-- Feature redundancy affects model stability
-- Low variance does not always mean low importance
-- Effective dimensionality depends on representation
-- Machine Learning supports analysts, it does not replace them
+- Anomaly detection is threshold-sensitive  
+- Feature redundancy affects stability  
+- Low variance does not imply low importance  
+- Representation defines effective dimensionality  
+- ML supports analysts, not replaces them  
+- Automatic relabeling is risky  
+- High accuracy ≠ real-world performance  
+- Clustering validates intrinsic structure  
 
 ---
 
 ## Generated Visualizations
 
-All figures generated during the pipeline execution are automatically stored in:
+Stored in:
+
 
 reports/figures/
 
-These include:
 
-- Label distribution
-- Feature distributions
-- Correlation matrix
-- Anomaly score distribution
-- Score comparison by class
-- PCA projection
+Includes:
+
+- Label distribution  
+- Feature distributions  
+- Correlation matrix  
+- Anomaly score distribution  
+- PCA projections  
+- Clustering comparisons  
+- Confusion matrices  
+- Model comparison charts  
+
+---
 
 ## Final Reflection
 
